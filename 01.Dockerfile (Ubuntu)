@@ -1,0 +1,7 @@
+FROM ubuntu
+RUN apt update -y
+RUN apt install nginx -y
+RUN cd /var/www/html
+RUN touch rohan.html
+RUN echo "HII....." > rohan.html
+CMD ["nginx","-g","daemon off;"]
