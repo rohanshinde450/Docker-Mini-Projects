@@ -1,0 +1,6 @@
+FROM nginx
+COPY custome.sh /usr/local/bin/custome.sh
+RUN chmod +x /usr/local/bin/custome.sh
+EXPOSE 80
+ENTRYPOINT ["/bin/bash", "-c", "/usr/local/bin/custome.sh && nginx -g 'daemon off;'"]
+
