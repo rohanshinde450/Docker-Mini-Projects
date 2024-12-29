@@ -1,0 +1,80 @@
+1) Docker-Compose Code
+
+version: '3.9'
+services:
+       web:
+          build:
+            context: ./web
+          ports:
+            - 80:80
+          volumes:
+            - ./web/myhtmlcode:/usr/share/nginx/html/
+          networks:
+             - webnet
+       app:
+        build:
+         context: ./app
+        ports:
+         - 9000
+        volumes:
+          - ./app/myphpcode:/usr/share/nginx/html
+        networks:
+          - webnet
+          - appnet
+
+       db:
+        build:
+          context: ./db
+        ports:
+         - 3306
+        volumes:
+          - databackup:/var/lib/sql
+        networks:
+           - appnet
+
+
+networks:
+  webnet:
+    driver: bridge
+  appnet:
+    driver: bridge
+
+volumes:
+   databackup:
+
+
+2) web tier code 
+
+FROM nginx
+COPY default.conf /etc/nginx/conf.d/
+EXPOSE 80
+CMD ["nginx","-g","daemon off;"]
+
+-------------**default.conf**----------------
+ 
+    location ~ \.php$ {
+        root           /usr/share/nginx/html;
+        fastcgi_pass   app:9000;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  /usr/share/nginx/html$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+
+
+3) app tier code
+
+FROM php:8.2-fpm
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+WORKDIR /usr/share/nginx/html/
+
+CMD ["php-fpm"]
+
+
+4) Db tier code
+
+FROM mysql
+ENV MYSQL_ROOT_PASSWORD=Pass@123
+COPY init.sql /docker-entrypoint-initdb.d/
+COPY init.sh /docker-entrypoint-initdb.d/
+EXPOSE 3306
+CMD ["mysqld"]
