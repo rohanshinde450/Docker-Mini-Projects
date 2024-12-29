@@ -1,0 +1,5 @@
+FROM mysql
+ARG Password
+ENV MYSQL_ROOT_PASSWORD=${Password}
+EXPOSE 3306
+CMD ["mysqld"]
